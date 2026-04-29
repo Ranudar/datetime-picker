@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DateTimePicker — Demo</title>
+  <style>
+/* ---- trigger ---- */
+.dtp-trigger {
+  display: inline-flex;
+  align-items: center;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  color: #0f172a;
+  min-width: 0;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.dtp-trigger:hover {
+  background: #e5e7eb;
+}
+.dtp-trigger:focus-visible {
+  border-color: #4f46e5;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+}
+.dtp-placeholder {
+  color: #94a3b8;
+}
+
+/* ---- overlay + popup ---- */
+.dtp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 16px;
+}
+.dtp-popup {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: min(720px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+
+/* ---- panel shell ---- */
+.dtp-panel {
+  padding: 14px 18px 10px;
+}
+
+.dtp-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(260px, 1fr);
+  gap: 0 24px;
+  align-items: start;
+}
+
+/* ---- calendar ---- */
+.dtp-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.dtp-cal-header strong {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.dtp-cal-header button {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.dtp-cal-header button:hover {
+  background: #f3f4f6;
+}
+
+.dtp-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.dtp-cal-cell {
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+.dtp-dow {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: default;
+  text-transform: uppercase;
+}
+.dtp-other {
+  color: #94a3b8;
+}
+.dtp-today {
+  box-shadow: inset 0 0 0 2px #4f46e5;
+}
+.dtp-cal-cell.dtp-sel {
+  background: #4f46e5;
+  color: #fff;
+  font-weight: 600;
+}
+.dtp-cal-cell:not(.dtp-dow):not(.dtp-sel):hover {
+  background: #f3f4f6;
+}
+
+/* ---- analog clock ---- */
+.dtp-clock-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+}
+.dtp-clock-svg {
+  display: block;
+  width: min(100%, 310px);
+  max-width: 310px;
+  touch-action: manipulation;
+}
+/* The SVG is interacted with by pointer only; suppress all focus outlines. */
+.dtp-clock-svg:focus { outline: none; }
+.dtp-clock-bg {
+  fill: #f3f4f6;
+}
+.dtp-clock-center {
+  fill: #4f46e5;
+}
+.dtp-clock-hand {
+  stroke: #4f46e5;
+  stroke-width: 2;
+}
+.dtp-clock-thumb {
+  fill: #ddd6fe;
+}
+.dtp-clock-num {
+  font-size: 16px;
+  font-family: inherit;
+  fill: #0f172a;
+  text-anchor: middle;
+  dominant-baseline: central;
+  cursor: pointer;
+  user-select: none;
+}
+.dtp-clock-num.dtp-inner {
+  font-size: 14px;
+  fill: #475569;
+}
+.dtp-clock-num.dtp-sel {
+  fill: #fff;
+  font-weight: 600;
+}
+.dtp-clock-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+/* ---- bottom row ---- */
+.dtp-bottom {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 clamp(24px, 5vw, 56px);
+  border-top: 1px solid #d1d5db;
+  margin-top: 10px;
+  padding-top: 12px;
+  overflow: hidden;
+}
+.dtp-date-block,
+.dtp-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* date display: 3 columns — one per part (day, month, year), with steppers above + below */
+.dtp-date-display {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  justify-content: center;
+  row-gap: 3px;
+  column-gap: clamp(4px, 0.8vw, 6px);
+}
+/* time display: 3 columns — hh, colon, mm */
+.dtp-time-display {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  justify-content: center;
+  row-gap: 3px;
+  column-gap: clamp(2px, 0.6vw, 4px);
+}
+
+.dtp-colon {
+  font-size: clamp(28px, 4.5vw, 38px);
+  font-weight: 600;
+  color: #475569;
+  line-height: 1;
+  text-align: center;
+  padding: 0 4px;
+}
+/* `.dtp-spacer` (in JSX) is a structural placeholder that fills column 2 of
+   `.dtp-time-display` in the stepper rows, so the colon column lines up. The
+   column auto-sizes to the colon's width, so no explicit width is needed. */
+
+/* ---- date number boxes (input + trailing dot inside one styled box) ----
+   Scoped under .dtp-popup so specificity wins over outer label/form rules
+   (e.g. `.form-field label { font-size: 12px }`).
+   No min-width — boxes hug their content to avoid empty horizontal padding. */
+.dtp-popup .dtp-num-box {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 4px 4px;
+  cursor: text;
+  color: #0f172a;
+  font-size: clamp(28px, 4.5vw, 38px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.dtp-popup .dtp-num-box.dtp-active {
+  background: #4f46e5;
+  color: #fff;
+}
+.dtp-popup .dtp-num-box:focus-within {
+  border-color: #a5b4fc;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+}
+/* Pair = input + trailing dot bundled as one unit. The pair has natural
+   intrinsic width (input content + dot), so .dtp-num-box's
+   justify-content: center centers the visible "29." cluster instead of
+   centering an over-wide input that pushes the digits to the right. */
+.dtp-popup .dtp-num-pair {
+  display: inline-flex;
+  align-items: baseline;
+}
+.dtp-popup .dtp-num-suffix {
+  margin-left: 1px;
+  pointer-events: none;
+}
+
+.dtp-popup .dtp-num-input {
+  /* font-* (family/size/weight/line-height) inherited via the global
+     `input { font: inherit }` rule. font-variant-numeric is not part of
+     the `font` shorthand, so it must be set explicitly. */
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  text-align: right;
+  width: 1.4em;
+}
+.dtp-popup .dtp-num-input.dtp-num-input-y {
+  width: 2.8em;
+  text-align: center;
+}
+
+/* ---- time number inputs (no trailing dot, colon lives between) ----
+   Scoped under .dtp-popup to win over outer `.form-field-control input`
+   which would otherwise force width:100% + padding:6px 8px. */
+.dtp-popup .dtp-num {
+  font-size: clamp(28px, 4.5vw, 38px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 4px 4px;
+  cursor: text;
+  color: #0f172a;
+  text-align: center;
+  outline: none;
+  width: 1.9em;
+}
+.dtp-popup .dtp-num.dtp-active {
+  background: #4f46e5;
+  color: #fff;
+}
+.dtp-popup .dtp-num:focus {
+  border-color: #a5b4fc;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+}
+
+/* ---- stepper buttons ---- */
+.dtp-stepper {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 0;
+  cursor: pointer;
+  width: 100%;
+  min-width: 0;
+  min-height: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1;
+}
+.dtp-stepper:hover {
+  background: #f3f4f6;
+  color: #0f172a;
+}
+
+/* ---- preset buttons ---- */
+.dtp-preset {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4f46e5;
+  margin-top: 8px;
+}
+.dtp-preset:hover {
+  background: #eef2ff;
+  border-color: #4f46e5;
+}
+
+/* ---- footer ---- */
+.dtp-footer {
+  border-top: 1px solid #d1d5db;
+  margin-top: 12px;
+  padding-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.dtp-btn {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 6px 18px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+.dtp-btn:hover {
+  background: #f3f4f6;
+}
+.dtp-primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+.dtp-primary:hover {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+/* ---- responsive ---- */
+@media (max-width: 720px) {
+  .dtp-grid {
+    grid-template-columns: 1fr;
+  }
+  .dtp-bottom {
+    grid-template-columns: 1fr;
+    gap: 18px 0;
+    overflow: visible;
+  }
+}
+@media (max-width: 430px) {
+  .dtp-panel {
+    padding: 16px 14px 14px;
+  }
+  .dtp-cal-header strong {
+    font-size: 18px;
+  }
+  .dtp-cal-cell {
+    font-size: 14px;
+  }
+  .dtp-dow {
+    font-size: 11px;
+  }
+}
+    /* --- Demo wrapper --- */
+    body {
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 680px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #111827;
+      background: #ffffff;
+    }
+    h1 { font-size: 24px; margin-bottom: 6px; }
+    .lead { color: #6b7280; margin-top: 0; margin-bottom: 24px; }
+    .demo-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .demo-row { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .demo-row label { font-size: 13px; color: #6b7280; min-width: 80px; }
+    .demo-output {
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .demo-buttons { margin-top: 16px; display: flex; gap: 8px; }
+    .demo-btn { padding: 6px 14px; border: 1px solid #d1d5db; background: #ffffff; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .demo-btn:hover { background: #f3f4f6; }
+    .demo-btn.primary { background: #4f46e5; color: white; border-color: #4f46e5; }
+    .demo-btn.primary:hover { background: #4338ca; }
+    .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; }
+    .footer a { color: #4f46e5; }
+  </style>
+</head>
+<body>
+  <h1>DateTimePicker</h1>
+  <p class="lead">Klick auf den Trigger öffnet das Popup. Tag / Monat / Jahr / Stunde / Minute via Tastatur, Mausrad oder Pfeiltasten anpassen, mit Enter bestätigen.</p>
+
+  <div id="root"></div>
+
+  <p class="footer">
+    Source: <a href="https://github.com/Ranudar/datetime-picker">github.com/Ranudar/datetime-picker</a> ·
+    Single-file demo, kein Build-Schritt am Client. React via esm.sh (importmap); Komponente vorab via esbuild gebündelt und inline. Direkt aus dem Browser über <code>file://</code> öffenbar (Internet-Verbindung für CDN-React erforderlich).
+  </p>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19.2.5",
+      "react/jsx-runtime": "https://esm.sh/react@19.2.5/jsx-runtime",
+      "react-dom/client": "https://esm.sh/react-dom@19.2.5/client?deps=react@19.2.5"
+    }
+  }
+  </script>
+
+  <script type="module">
+// ../tmp.gx3ljtotIw/demo.tsx
+import { useState as useState2 } from "react";
+import { createRoot } from "react-dom/client";
+
+// ../tmp.gx3ljtotIw/DateTimePicker.tsx
+import { useState, useRef, useEffect } from "react";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+var MONTHS = ["Januar", "Februar", "M\xE4rz", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+var DOW = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+var RING_OUTER = 88;
+var RING_INNER = 62;
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+function clamp(n, lo, hi) {
+  return Math.max(lo, Math.min(hi, n));
+}
+function wrap(n, size) {
+  return (n % size + size) % size;
+}
+function onlyDigits(s) {
+  return s.replace(/\D/g, "");
+}
+function daysInMonth(y, m) {
+  return new Date(y, m + 1, 0).getDate();
+}
+function parseInputStr(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/.exec(s);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] ?? 0), +(m[5] ?? 0));
+  return /* @__PURE__ */ new Date();
+}
+function toInputStr(d) {
+  return `${d.getFullYear().toString().padStart(4, "0")}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function fmtDisplay(d) {
+  return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function PickerPanel({ initial, onConfirm, onCancel }) {
+  const now = /* @__PURE__ */ new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const [ps, setPs] = useState({
+    date: new Date(initial),
+    mode: "hour",
+    part: "day",
+    calY: initial.getFullYear(),
+    calM: initial.getMonth()
+  });
+  const suppressBlur = useRef(false);
+  const svgRef = useRef(null);
+  const ddRef = useRef(null);
+  const mmRef = useRef(null);
+  const yyyyRef = useRef(null);
+  const hhRef = useRef(null);
+  const minRef = useRef(null);
+  useEffect(() => {
+    const sync = (ref, val) => {
+      if (ref.current && document.activeElement !== ref.current) ref.current.value = val;
+    };
+    sync(ddRef, pad2(ps.date.getDate()));
+    sync(mmRef, pad2(ps.date.getMonth() + 1));
+    sync(yyyyRef, ps.date.getFullYear().toString().padStart(4, "0"));
+    sync(hhRef, pad2(ps.date.getHours()));
+    sync(minRef, pad2(ps.date.getMinutes()));
+  }, [ps.date]);
+  function bumpDay(delta) {
+    setPs((p) => {
+      const d = new Date(p.date);
+      d.setDate(d.getDate() + delta);
+      return { ...p, date: d, part: "day", calY: d.getFullYear(), calM: d.getMonth() };
+    });
+  }
+  function bumpMonth(delta) {
+    setPs((p) => {
+      const y = p.date.getFullYear(), m = p.date.getMonth() + delta;
+      const day = clamp(p.date.getDate(), 1, daysInMonth(y, m));
+      const d = new Date(y, m, day, p.date.getHours(), p.date.getMinutes());
+      return { ...p, date: d, part: "month", calY: d.getFullYear(), calM: d.getMonth() };
+    });
+  }
+  function bumpYear(delta) {
+    setPs((p) => {
+      const y = clamp(p.date.getFullYear() + delta, 1, 9999), m = p.date.getMonth();
+      const day = clamp(p.date.getDate(), 1, daysInMonth(y, m));
+      const d = new Date(y, m, day, p.date.getHours(), p.date.getMinutes());
+      return { ...p, date: d, part: "year", calY: y, calM: m };
+    });
+  }
+  function bumpHour(delta) {
+    setPs((p) => {
+      const d = new Date(p.date);
+      d.setHours(wrap(d.getHours() + delta, 24));
+      return { ...p, date: d, mode: "hour" };
+    });
+  }
+  function bumpMinute(delta) {
+    setPs((p) => {
+      const d = new Date(p.date);
+      d.setMinutes(wrap(d.getMinutes() + delta, 60));
+      return { ...p, date: d, mode: "minute" };
+    });
+  }
+  function setHour(h) {
+    setPs((p) => {
+      const d = new Date(p.date);
+      d.setHours(wrap(h, 24));
+      return { ...p, date: d, mode: "minute" };
+    });
+  }
+  function setMinute(m) {
+    setPs((p) => {
+      const d = new Date(p.date);
+      d.setMinutes(wrap(m, 60));
+      return { ...p, date: d };
+    });
+  }
+  function setDatePartFromInput(part, raw) {
+    const n = parseInt(onlyDigits(raw), 10);
+    if (isNaN(n)) return;
+    setPs((p) => {
+      const y = p.date.getFullYear(), m = p.date.getMonth(), day = p.date.getDate();
+      const h = p.date.getHours(), min = p.date.getMinutes();
+      let next;
+      if (part === "day") {
+        next = new Date(y, m, clamp(n, 1, daysInMonth(y, m)), h, min);
+      } else if (part === "month") {
+        const nm = clamp(n, 1, 12) - 1;
+        next = new Date(y, nm, clamp(day, 1, daysInMonth(y, nm)), h, min);
+      } else {
+        const ny = clamp(n, 1, 9999);
+        next = new Date(ny, m, clamp(day, 1, daysInMonth(ny, m)), h, min);
+      }
+      return { ...p, date: next, part, calY: next.getFullYear(), calM: next.getMonth() };
+    });
+  }
+  function setTimePartFromInput(mode, raw) {
+    const n = parseInt(onlyDigits(raw), 10);
+    if (isNaN(n)) return;
+    setPs((p) => {
+      const d = new Date(p.date);
+      if (mode === "hour") d.setHours(clamp(n, 0, 23));
+      else d.setMinutes(clamp(n, 0, 59));
+      return { ...p, date: d, mode };
+    });
+  }
+  function commitActiveField() {
+    const a = document.activeElement;
+    if (a === ddRef.current) setDatePartFromInput("day", ddRef.current.value);
+    else if (a === mmRef.current) setDatePartFromInput("month", mmRef.current.value);
+    else if (a === yyyyRef.current) setDatePartFromInput("year", yyyyRef.current.value);
+    else if (a === hhRef.current) setTimePartFromInput("hour", hhRef.current.value);
+    else if (a === minRef.current) setTimePartFromInput("minute", minRef.current.value);
+  }
+  function focusClockAfterPointer() {
+    requestAnimationFrame(() => {
+      svgRef.current?.focus({ preventScroll: true });
+      setTimeout(() => {
+        suppressBlur.current = false;
+      }, 0);
+    });
+  }
+  function handleSvgPointerDown(ev) {
+    ev.preventDefault();
+    suppressBlur.current = true;
+    commitActiveField();
+    const svg = svgRef.current;
+    const pt = svg.createSVGPoint();
+    pt.x = ev.clientX;
+    pt.y = ev.clientY;
+    const lp = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const r = Math.hypot(lp.x, lp.y);
+    if (r > 104) {
+      suppressBlur.current = false;
+      return;
+    }
+    let angle = Math.atan2(lp.y, lp.x) + Math.PI / 2;
+    if (angle < 0) angle += 2 * Math.PI;
+    const frac = angle / (2 * Math.PI);
+    setPs((p) => {
+      if (p.mode === "hour") {
+        const isInner = r < (RING_OUTER + RING_INNER) / 2;
+        let h = Math.round(frac * 12) % 12;
+        if (isInner) h = h === 0 ? 12 : h + 12;
+        const d = new Date(p.date);
+        d.setHours(wrap(h, 24));
+        return { ...p, date: d, mode: "minute" };
+      } else {
+        const m = Math.round(frac * 60) % 60;
+        const d = new Date(p.date);
+        d.setMinutes(wrap(m, 60));
+        return { ...p, date: d };
+      }
+    });
+    focusClockAfterPointer();
+  }
+  function handleNumPointerDown(ev, onClick) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    suppressBlur.current = true;
+    commitActiveField();
+    onClick();
+    focusClockAfterPointer();
+  }
+  function mkHandlers(ref, maxLen, onFocusPart, commit, bump) {
+    return {
+      onFocus() {
+        onFocusPart();
+        requestAnimationFrame(() => {
+          ref.current?.select();
+        });
+      },
+      onClick() {
+        ref.current?.select();
+      },
+      onMouseUp(ev) {
+        ev.preventDefault();
+      },
+      onChange(ev) {
+        const el = ev.currentTarget;
+        const filtered = onlyDigits(el.value).slice(0, maxLen);
+        el.value = filtered;
+        if (filtered.length >= maxLen) {
+          commit(filtered);
+          requestAnimationFrame(() => {
+            el.focus();
+            el.select();
+          });
+        }
+      },
+      onKeyDown(ev) {
+        if (ev.key === "ArrowUp" || ev.key === "ArrowDown") {
+          ev.preventDefault();
+          bump(ev.key === "ArrowUp" ? 1 : -1);
+          requestAnimationFrame(() => {
+            ref.current?.focus();
+            ref.current?.select();
+          });
+        } else if (ev.key === "Enter") {
+          ev.preventDefault();
+          commit(ev.currentTarget.value);
+          requestAnimationFrame(() => {
+            ref.current?.focus();
+            ref.current?.select();
+          });
+        }
+      },
+      onBlur() {
+        if (suppressBlur.current) return;
+        commit(ref.current.value);
+      }
+    };
+  }
+  function pointAt(idx12, r) {
+    const a = idx12 / 12 * 2 * Math.PI - Math.PI / 2;
+    return { x: Math.cos(a) * r, y: Math.sin(a) * r };
+  }
+  function renderClockNumbers() {
+    const isHour = ps.mode === "hour";
+    const selected = isHour ? ps.date.getHours() : ps.date.getMinutes();
+    const items = [];
+    if (isHour) {
+      for (let h = 0; h < 24; h++) {
+        const p = pointAt(h % 12, h < 12 ? RING_OUTER : RING_INNER);
+        const sel = h === selected, inner = h >= 12;
+        items.push(
+          /* @__PURE__ */ jsx(
+            "circle",
+            {
+              cx: p.x,
+              cy: p.y,
+              r: 22,
+              className: "dtp-clock-hit",
+              onPointerDown: (ev) => handleNumPointerDown(ev, () => setHour(h))
+            },
+            `h${h}`
+          ),
+          /* @__PURE__ */ jsx(
+            "text",
+            {
+              x: p.x,
+              y: p.y,
+              className: `dtp-clock-num${inner ? " dtp-inner" : ""}${sel ? " dtp-sel" : ""}`,
+              onPointerDown: (ev) => handleNumPointerDown(ev, () => setHour(h)),
+              children: h
+            },
+            `ht${h}`
+          )
+        );
+      }
+    } else {
+      for (let i = 0; i < 12; i++) {
+        const m = i * 5, p = pointAt(i, RING_OUTER), sel = m === selected;
+        items.push(
+          /* @__PURE__ */ jsx(
+            "circle",
+            {
+              cx: p.x,
+              cy: p.y,
+              r: 22,
+              className: "dtp-clock-hit",
+              onPointerDown: (ev) => handleNumPointerDown(ev, () => setMinute(m))
+            },
+            `m${i}`
+          ),
+          /* @__PURE__ */ jsx(
+            "text",
+            {
+              x: p.x,
+              y: p.y,
+              className: `dtp-clock-num${sel ? " dtp-sel" : ""}`,
+              onPointerDown: (ev) => handleNumPointerDown(ev, () => setMinute(m)),
+              children: pad2(m)
+            },
+            `mt${i}`
+          )
+        );
+      }
+    }
+    return items;
+  }
+  function clockHand() {
+    const h = ps.date.getHours(), m = ps.date.getMinutes();
+    let idx12, r;
+    if (ps.mode === "hour") {
+      idx12 = h % 12;
+      r = h >= 12 && h !== 0 ? RING_INNER : RING_OUTER;
+      if (h === 12) {
+        idx12 = 0;
+        r = RING_INNER;
+      }
+    } else {
+      idx12 = m / 5;
+      r = RING_OUTER;
+    }
+    const p = pointAt(idx12, r);
+    return { x: p.x, y: p.y, thumbR: r === RING_INNER ? 14 : 15 };
+  }
+  function calCells() {
+    const cells = [];
+    for (const d of DOW) {
+      cells.push(/* @__PURE__ */ jsx("div", { className: "dtp-cal-cell dtp-dow", children: d }, `dow-${d}`));
+    }
+    const first = new Date(ps.calY, ps.calM, 1);
+    const offset = (first.getDay() + 6) % 7;
+    const daysThis = daysInMonth(ps.calY, ps.calM);
+    const prevDays = daysInMonth(ps.calY, ps.calM - 1);
+    for (let i = offset - 1; i >= 0; i--) {
+      cells.push(calCell(prevDays - i, true, new Date(ps.calY, ps.calM - 1, prevDays - i)));
+    }
+    for (let d = 1; d <= daysThis; d++) {
+      cells.push(calCell(d, false, new Date(ps.calY, ps.calM, d)));
+    }
+    const trailing = 42 - (offset + daysThis);
+    for (let d = 1; d <= trailing; d++) {
+      cells.push(calCell(d, true, new Date(ps.calY, ps.calM + 1, d)));
+    }
+    return cells;
+  }
+  function calCell(label, other, date) {
+    const isToday = date.getTime() === today.getTime();
+    const isSel = date.getFullYear() === ps.date.getFullYear() && date.getMonth() === ps.date.getMonth() && date.getDate() === ps.date.getDate();
+    let cls = "dtp-cal-cell";
+    if (other) cls += " dtp-other";
+    if (isToday) cls += " dtp-today";
+    if (isSel) cls += " dtp-sel";
+    return /* @__PURE__ */ jsx(
+      "button",
+      {
+        type: "button",
+        className: cls,
+        onClick: () => {
+          const d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), ps.date.getHours(), ps.date.getMinutes());
+          setPs((p) => ({ ...p, date: d, mode: "hour", calY: date.getFullYear(), calM: date.getMonth() }));
+        },
+        children: label
+      },
+      date.toDateString()
+    );
+  }
+  const hand = clockHand();
+  return /* @__PURE__ */ jsxs("div", { className: "dtp-panel", children: [
+    /* @__PURE__ */ jsxs("div", { className: "dtp-grid", children: [
+      /* @__PURE__ */ jsxs("div", { children: [
+        /* @__PURE__ */ jsxs("div", { className: "dtp-cal-header", children: [
+          /* @__PURE__ */ jsx("button", { type: "button", onClick: () => setPs((p) => {
+            const m = p.calM === 0 ? 11 : p.calM - 1;
+            const y = p.calM === 0 ? p.calY - 1 : p.calY;
+            return { ...p, calM: m, calY: y };
+          }), children: "\u25C0" }),
+          /* @__PURE__ */ jsxs("strong", { children: [
+            MONTHS[ps.calM],
+            " ",
+            ps.calY
+          ] }),
+          /* @__PURE__ */ jsx("button", { type: "button", onClick: () => setPs((p) => {
+            const m = p.calM === 11 ? 0 : p.calM + 1;
+            const y = p.calM === 11 ? p.calY + 1 : p.calY;
+            return { ...p, calM: m, calY: y };
+          }), children: "\u25B6" })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "dtp-cal-grid", children: calCells() })
+      ] }),
+      /* @__PURE__ */ jsx("div", { className: "dtp-clock-panel", children: /* @__PURE__ */ jsxs(
+        "svg",
+        {
+          ref: svgRef,
+          className: "dtp-clock-svg",
+          viewBox: "-110 -110 220 220",
+          tabIndex: 0,
+          onPointerDown: handleSvgPointerDown,
+          children: [
+            /* @__PURE__ */ jsx("circle", { cx: "0", cy: "0", r: "104", className: "dtp-clock-bg" }),
+            /* @__PURE__ */ jsx("line", { x1: "0", y1: "0", x2: hand.x, y2: hand.y, className: "dtp-clock-hand" }),
+            /* @__PURE__ */ jsx("circle", { cx: hand.x, cy: hand.y, r: hand.thumbR, className: "dtp-clock-thumb" }),
+            /* @__PURE__ */ jsx("circle", { cx: "0", cy: "0", r: "2.5", className: "dtp-clock-center" }),
+            /* @__PURE__ */ jsx("g", { children: renderClockNumbers() })
+          ]
+        }
+      ) }),
+      /* @__PURE__ */ jsxs("div", { className: "dtp-bottom", children: [
+        /* @__PURE__ */ jsxs("div", { className: "dtp-date-block", children: [
+          /* @__PURE__ */ jsxs("div", { className: "dtp-date-display", children: [
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpDay(1), children: "\u25B2" }),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpMonth(1), children: "\u25B2" }),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpYear(1), children: "\u25B2" }),
+            /* @__PURE__ */ jsx("label", { className: `dtp-num-box${ps.part === "day" ? " dtp-active" : ""}`, children: /* @__PURE__ */ jsxs("span", { className: "dtp-num-pair", children: [
+              /* @__PURE__ */ jsx(
+                "input",
+                {
+                  ref: ddRef,
+                  className: "dtp-num-input",
+                  "aria-label": "Tag",
+                  inputMode: "numeric",
+                  maxLength: 2,
+                  autoComplete: "off",
+                  defaultValue: pad2(ps.date.getDate()),
+                  ...mkHandlers(ddRef, 2, () => setPs((p) => ({ ...p, part: "day" })), (v) => setDatePartFromInput("day", v), bumpDay)
+                }
+              ),
+              /* @__PURE__ */ jsx("span", { className: "dtp-num-suffix", children: "." })
+            ] }) }),
+            /* @__PURE__ */ jsx("label", { className: `dtp-num-box${ps.part === "month" ? " dtp-active" : ""}`, children: /* @__PURE__ */ jsxs("span", { className: "dtp-num-pair", children: [
+              /* @__PURE__ */ jsx(
+                "input",
+                {
+                  ref: mmRef,
+                  className: "dtp-num-input",
+                  "aria-label": "Monat",
+                  inputMode: "numeric",
+                  maxLength: 2,
+                  autoComplete: "off",
+                  defaultValue: pad2(ps.date.getMonth() + 1),
+                  ...mkHandlers(mmRef, 2, () => setPs((p) => ({ ...p, part: "month" })), (v) => setDatePartFromInput("month", v), bumpMonth)
+                }
+              ),
+              /* @__PURE__ */ jsx("span", { className: "dtp-num-suffix", children: "." })
+            ] }) }),
+            /* @__PURE__ */ jsx("label", { className: `dtp-num-box dtp-num-box-y${ps.part === "year" ? " dtp-active" : ""}`, children: /* @__PURE__ */ jsx(
+              "input",
+              {
+                ref: yyyyRef,
+                className: "dtp-num-input dtp-num-input-y",
+                "aria-label": "Jahr",
+                inputMode: "numeric",
+                maxLength: 4,
+                autoComplete: "off",
+                defaultValue: ps.date.getFullYear().toString().padStart(4, "0"),
+                ...mkHandlers(yyyyRef, 4, () => setPs((p) => ({ ...p, part: "year" })), (v) => setDatePartFromInput("year", v), bumpYear)
+              }
+            ) }),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpDay(-1), children: "\u25BC" }),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpMonth(-1), children: "\u25BC" }),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpYear(-1), children: "\u25BC" })
+          ] }),
+          /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-preset", onClick: () => setPs((p) => {
+            const d = new Date(p.date);
+            d.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+            return { ...p, date: d, part: "day", calY: now.getFullYear(), calM: now.getMonth() };
+          }), children: "Heute" })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "dtp-time-block", children: [
+          /* @__PURE__ */ jsxs("div", { className: "dtp-time-display", children: [
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpHour(1), children: "\u25B2" }),
+            /* @__PURE__ */ jsx("span", { className: "dtp-spacer" }),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpMinute(1), children: "\u25B2" }),
+            /* @__PURE__ */ jsx(
+              "input",
+              {
+                ref: hhRef,
+                className: `dtp-num${ps.mode === "hour" ? " dtp-active" : ""}`,
+                "aria-label": "Stunde",
+                inputMode: "numeric",
+                maxLength: 2,
+                autoComplete: "off",
+                defaultValue: pad2(ps.date.getHours()),
+                ...mkHandlers(hhRef, 2, () => setPs((p) => ({ ...p, mode: "hour" })), (v) => setTimePartFromInput("hour", v), bumpHour)
+              }
+            ),
+            /* @__PURE__ */ jsx("span", { className: "dtp-colon", children: ":" }),
+            /* @__PURE__ */ jsx(
+              "input",
+              {
+                ref: minRef,
+                className: `dtp-num${ps.mode === "minute" ? " dtp-active" : ""}`,
+                "aria-label": "Minute",
+                inputMode: "numeric",
+                maxLength: 2,
+                autoComplete: "off",
+                defaultValue: pad2(ps.date.getMinutes()),
+                ...mkHandlers(minRef, 2, () => setPs((p) => ({ ...p, mode: "minute" })), (v) => setTimePartFromInput("minute", v), bumpMinute)
+              }
+            ),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpHour(-1), children: "\u25BC" }),
+            /* @__PURE__ */ jsx("span", { className: "dtp-spacer" }),
+            /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-stepper", onClick: () => bumpMinute(-1), children: "\u25BC" })
+          ] }),
+          /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-preset", onClick: () => setPs((p) => {
+            const d = new Date(p.date);
+            d.setHours(now.getHours(), now.getMinutes());
+            return { ...p, date: d, mode: "hour" };
+          }), children: "Jetzt" })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "dtp-footer", children: [
+      /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-btn", onClick: onCancel, children: "Abbrechen" }),
+      /* @__PURE__ */ jsx("button", { type: "button", className: "dtp-btn dtp-primary", onClick: () => onConfirm(ps.date), children: "OK" })
+    ] })
+  ] });
+}
+function DateTimePicker({ id, value, onChange, disabled }) {
+  const [open, setOpen] = useState(false);
+  const parsed = value ? parseInputStr(value) : null;
+  function handleConfirm(d) {
+    onChange(toInputStr(d));
+    setOpen(false);
+  }
+  return /* @__PURE__ */ jsxs(Fragment, { children: [
+    /* @__PURE__ */ jsx(
+      "button",
+      {
+        id,
+        type: "button",
+        className: "dtp-trigger",
+        onClick: () => {
+          if (!disabled) setOpen(true);
+        },
+        disabled,
+        title: disabled ? "Aus Vorg\xE4ngerphase \xFCbernommen" : void 0,
+        children: parsed ? fmtDisplay(parsed) : /* @__PURE__ */ jsx("span", { className: "dtp-placeholder", children: "Datum & Zeit w\xE4hlen" })
+      }
+    ),
+    open && /* @__PURE__ */ jsx("div", { className: "dtp-overlay", onPointerDown: (e) => {
+      if (e.target === e.currentTarget) setOpen(false);
+    }, children: /* @__PURE__ */ jsx("div", { className: "dtp-popup", children: /* @__PURE__ */ jsx(
+      PickerPanel,
+      {
+        initial: parsed ?? /* @__PURE__ */ new Date(),
+        onConfirm: handleConfirm,
+        onCancel: () => setOpen(false)
+      }
+    ) }) })
+  ] });
+}
+
+// ../tmp.gx3ljtotIw/demo.tsx
+import { jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
+function Demo() {
+  const [value, setValue] = useState2("");
+  const [disabled, setDisabled] = useState2(false);
+  const fmt = (s) => {
+    if (!s) return "(leer)";
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? "(invalid)" : d.toLocaleString("de-CH", { dateStyle: "long", timeStyle: "short" });
+  };
+  return /* @__PURE__ */ jsxs2("div", { className: "demo-card", children: [
+    /* @__PURE__ */ jsxs2("div", { className: "demo-row", children: [
+      /* @__PURE__ */ jsx2("label", { htmlFor: "dtp-demo", children: "Datum & Zeit:" }),
+      /* @__PURE__ */ jsx2(DateTimePicker, { id: "dtp-demo", value, onChange: setValue, disabled })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { className: "demo-row", children: [
+      /* @__PURE__ */ jsx2("label", { children: "Wert (raw):" }),
+      /* @__PURE__ */ jsx2("span", { className: "demo-output", children: value || "(leer)" })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { className: "demo-row", children: [
+      /* @__PURE__ */ jsx2("label", { children: "Lesbar:" }),
+      /* @__PURE__ */ jsx2("span", { children: fmt(value) })
+    ] }),
+    /* @__PURE__ */ jsxs2("div", { className: "demo-buttons", children: [
+      /* @__PURE__ */ jsx2("button", { className: "demo-btn primary", onClick: () => setValue((/* @__PURE__ */ new Date()).toISOString().slice(0, 16)), children: "Jetzt" }),
+      /* @__PURE__ */ jsx2("button", { className: "demo-btn", onClick: () => setValue(""), children: "Zur\xFCcksetzen" }),
+      /* @__PURE__ */ jsx2("button", { className: "demo-btn", onClick: () => setDisabled((d) => !d), children: disabled ? "Aktivieren" : "Deaktivieren" })
+    ] })
+  ] });
+}
+var root = createRoot(document.getElementById("root"));
+root.render(/* @__PURE__ */ jsx2(Demo, {}));
+  </script>
+</body>
+</html>
