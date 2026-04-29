@@ -1,0 +1,30 @@
+{
+  "name": "datetime-picker",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Compact button-triggered date/time picker for React. Numeric Tag/Monat/Jahr/Stunde/Minute inputs in a popup; designed for clinical-grade data entry.",
+  "type": "module",
+  "main": "src/DateTimePicker.tsx",
+  "types": "src/DateTimePicker.tsx",
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/DateTimePicker.tsx",
+      "import": "./src/DateTimePicker.tsx"
+    },
+    "./DateTimePicker.css": "./src/DateTimePicker.css"
+  },
+  "peerDependencies": {
+    "react": ">=18 <20"
+  },
+  "keywords": [
+    "react",
+    "datetime",
+    "picker",
+    "datepicker",
+    "timepicker"
+  ]
+}

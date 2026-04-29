@@ -1,0 +1,403 @@
+/* ---- trigger ---- */
+.dtp-trigger {
+  display: inline-flex;
+  align-items: center;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  color: #0f172a;
+  min-width: 0;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.dtp-trigger:hover {
+  background: #e5e7eb;
+}
+.dtp-trigger:focus-visible {
+  border-color: #4f46e5;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+}
+.dtp-placeholder {
+  color: #94a3b8;
+}
+
+/* ---- overlay + popup ---- */
+.dtp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 16px;
+}
+.dtp-popup {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: min(720px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+
+/* ---- panel shell ---- */
+.dtp-panel {
+  padding: 14px 18px 10px;
+}
+
+.dtp-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(260px, 1fr);
+  gap: 0 24px;
+  align-items: start;
+}
+
+/* ---- calendar ---- */
+.dtp-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.dtp-cal-header strong {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.dtp-cal-header button {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.dtp-cal-header button:hover {
+  background: #f3f4f6;
+}
+
+.dtp-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.dtp-cal-cell {
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+.dtp-dow {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: default;
+  text-transform: uppercase;
+}
+.dtp-other {
+  color: #94a3b8;
+}
+.dtp-today {
+  box-shadow: inset 0 0 0 2px #4f46e5;
+}
+.dtp-cal-cell.dtp-sel {
+  background: #4f46e5;
+  color: #fff;
+  font-weight: 600;
+}
+.dtp-cal-cell:not(.dtp-dow):not(.dtp-sel):hover {
+  background: #f3f4f6;
+}
+
+/* ---- analog clock ---- */
+.dtp-clock-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+}
+.dtp-clock-svg {
+  display: block;
+  width: min(100%, 310px);
+  max-width: 310px;
+  touch-action: manipulation;
+}
+/* The SVG is interacted with by pointer only; suppress all focus outlines. */
+.dtp-clock-svg:focus { outline: none; }
+.dtp-clock-bg {
+  fill: #f3f4f6;
+}
+.dtp-clock-center {
+  fill: #4f46e5;
+}
+.dtp-clock-hand {
+  stroke: #4f46e5;
+  stroke-width: 2;
+}
+.dtp-clock-thumb {
+  fill: #ddd6fe;
+}
+.dtp-clock-num {
+  font-size: 16px;
+  font-family: inherit;
+  fill: #0f172a;
+  text-anchor: middle;
+  dominant-baseline: central;
+  cursor: pointer;
+  user-select: none;
+}
+.dtp-clock-num.dtp-inner {
+  font-size: 14px;
+  fill: #475569;
+}
+.dtp-clock-num.dtp-sel {
+  fill: #fff;
+  font-weight: 600;
+}
+.dtp-clock-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+/* ---- bottom row ---- */
+.dtp-bottom {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 clamp(24px, 5vw, 56px);
+  border-top: 1px solid #d1d5db;
+  margin-top: 10px;
+  padding-top: 12px;
+  overflow: hidden;
+}
+.dtp-date-block,
+.dtp-time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* date display: 3 columns — one per part (day, month, year), with steppers above + below */
+.dtp-date-display {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  justify-content: center;
+  row-gap: 3px;
+  column-gap: clamp(4px, 0.8vw, 6px);
+}
+/* time display: 3 columns — hh, colon, mm */
+.dtp-time-display {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  justify-content: center;
+  row-gap: 3px;
+  column-gap: clamp(2px, 0.6vw, 4px);
+}
+
+.dtp-colon {
+  font-size: clamp(28px, 4.5vw, 38px);
+  font-weight: 600;
+  color: #475569;
+  line-height: 1;
+  text-align: center;
+  padding: 0 4px;
+}
+/* `.dtp-spacer` (in JSX) is a structural placeholder that fills column 2 of
+   `.dtp-time-display` in the stepper rows, so the colon column lines up. The
+   column auto-sizes to the colon's width, so no explicit width is needed. */
+
+/* ---- date number boxes (input + trailing dot inside one styled box) ----
+   Scoped under .dtp-popup so specificity wins over outer label/form rules
+   (e.g. `.form-field label { font-size: 12px }`).
+   No min-width — boxes hug their content to avoid empty horizontal padding. */
+.dtp-popup .dtp-num-box {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 4px 4px;
+  cursor: text;
+  color: #0f172a;
+  font-size: clamp(28px, 4.5vw, 38px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.dtp-popup .dtp-num-box.dtp-active {
+  background: #4f46e5;
+  color: #fff;
+}
+.dtp-popup .dtp-num-box:focus-within {
+  border-color: #a5b4fc;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+}
+/* Pair = input + trailing dot bundled as one unit. The pair has natural
+   intrinsic width (input content + dot), so .dtp-num-box's
+   justify-content: center centers the visible "29." cluster instead of
+   centering an over-wide input that pushes the digits to the right. */
+.dtp-popup .dtp-num-pair {
+  display: inline-flex;
+  align-items: baseline;
+}
+.dtp-popup .dtp-num-suffix {
+  margin-left: 1px;
+  pointer-events: none;
+}
+
+.dtp-popup .dtp-num-input {
+  /* font-* (family/size/weight/line-height) inherited via the global
+     `input { font: inherit }` rule. font-variant-numeric is not part of
+     the `font` shorthand, so it must be set explicitly. */
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  text-align: right;
+  width: 1.4em;
+}
+.dtp-popup .dtp-num-input.dtp-num-input-y {
+  width: 2.8em;
+  text-align: center;
+}
+
+/* ---- time number inputs (no trailing dot, colon lives between) ----
+   Scoped under .dtp-popup to win over outer `.form-field-control input`
+   which would otherwise force width:100% + padding:6px 8px. */
+.dtp-popup .dtp-num {
+  font-size: clamp(28px, 4.5vw, 38px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  background: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 4px 4px;
+  cursor: text;
+  color: #0f172a;
+  text-align: center;
+  outline: none;
+  width: 1.9em;
+}
+.dtp-popup .dtp-num.dtp-active {
+  background: #4f46e5;
+  color: #fff;
+}
+.dtp-popup .dtp-num:focus {
+  border-color: #a5b4fc;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+}
+
+/* ---- stepper buttons ---- */
+.dtp-stepper {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 0;
+  cursor: pointer;
+  width: 100%;
+  min-width: 0;
+  min-height: 24px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1;
+}
+.dtp-stepper:hover {
+  background: #f3f4f6;
+  color: #0f172a;
+}
+
+/* ---- preset buttons ---- */
+.dtp-preset {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4f46e5;
+  margin-top: 8px;
+}
+.dtp-preset:hover {
+  background: #eef2ff;
+  border-color: #4f46e5;
+}
+
+/* ---- footer ---- */
+.dtp-footer {
+  border-top: 1px solid #d1d5db;
+  margin-top: 12px;
+  padding-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.dtp-btn {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 6px 18px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+.dtp-btn:hover {
+  background: #f3f4f6;
+}
+.dtp-primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+.dtp-primary:hover {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+/* ---- responsive ---- */
+@media (max-width: 720px) {
+  .dtp-grid {
+    grid-template-columns: 1fr;
+  }
+  .dtp-bottom {
+    grid-template-columns: 1fr;
+    gap: 18px 0;
+    overflow: visible;
+  }
+}
+@media (max-width: 430px) {
+  .dtp-panel {
+    padding: 16px 14px 14px;
+  }
+  .dtp-cal-header strong {
+    font-size: 18px;
+  }
+  .dtp-cal-cell {
+    font-size: 14px;
+  }
+  .dtp-dow {
+    font-size: 11px;
+  }
+}
