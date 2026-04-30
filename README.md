@@ -75,6 +75,21 @@ open it in a browser.
   selectors so it shouldn't fight your app's CSS.
 - `index.html` — fully self-contained demo (React + DateTimePicker + CSS
   bundled inline, minified, NODE_ENV=production).
+- `e2e/picker.spec.ts` — Playwright end-to-end tests against the bundled
+  `index.html` (covers panel rendering, no external requests, arrow-key
+  bumps on focused inputs, partial-typing UX, stepper buttons, the
+  Heute reset button).
+
+## Tests
+
+```sh
+npm install
+npm run test:e2e
+```
+
+Playwright auto-spins `python3 -m http.server 8765` against the repo
+root for the duration of the test run, so no separate dev server is
+needed. The eight checks complete in about 6 seconds on Chromium.
 
 ## Rebuilding the demo (only if you change the component)
 
