@@ -294,6 +294,12 @@
    Scoped under .dtp-popup to win over outer `.form-field-control input`
    which would otherwise force width:100% + padding:6px 8px. */
 .dtp-popup .dtp-num {
+  /* Browsers don't inherit font-family on form elements by default
+     (they apply their own UI font). Force inheritance so the time
+     inputs match the date inputs / surrounding labels typographically.
+     The other font-* properties stay explicit because this is the
+     input itself (no styled wrapper to inherit from). */
+  font-family: inherit;
   font-size: clamp(28px, 4.5vw, 38px);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
