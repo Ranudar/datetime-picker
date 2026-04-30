@@ -65,10 +65,24 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   const hhRef = useRef<HTMLInputElement>(null);
   const minRef = useRef<HTMLInputElement>(null);
 
-  // Sync non-focused inputs when state changes
+  // External-mutation marker. Bump / clock handlers set this to `true`
+  // immediately before calling setPs; the next sync effect then writes
+  // the new values into every input, even the currently-focused one.
+  // Typing-driven state updates leave it false, so an in-progress input
+  // value (e.g. user typed "1" while heading for "10") isn't clobbered
+  // back to its padded form before the user finishes.
+  const forceSyncFocusedRef = useRef(false);
+
+  // Sync inputs when state changes. By default we skip the currently-
+  // focused input (see comment above on forceSyncFocusedRef); arrow-key
+  // bumps and clock clicks override that.
   useEffect(() => {
+    const force = forceSyncFocusedRef.current;
+    forceSyncFocusedRef.current = false;
     const sync = (ref: React.RefObject<HTMLInputElement | null>, val: string) => {
-      if (ref.current && document.activeElement !== ref.current) ref.current.value = val;
+      if (ref.current && (force || document.activeElement !== ref.current)) {
+        ref.current.value = val;
+      }
     };
     sync(ddRef, pad2(ps.date.getDate()));
     sync(mmRef, pad2(ps.date.getMonth() + 1));
@@ -80,6 +94,7 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   // ---- mutators ----
 
   function bumpDay(delta: number) {
+    forceSyncFocusedRef.current = true;
     setPs(p => {
       const d = new Date(p.date); d.setDate(d.getDate() + delta);
       return { ...p, date: d, part: 'day', calY: d.getFullYear(), calM: d.getMonth() };
@@ -87,6 +102,7 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   }
 
   function bumpMonth(delta: number) {
+    forceSyncFocusedRef.current = true;
     setPs(p => {
       const y = p.date.getFullYear(), m = p.date.getMonth() + delta;
       const day = clamp(p.date.getDate(), 1, daysInMonth(y, m));
@@ -96,6 +112,7 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   }
 
   function bumpYear(delta: number) {
+    forceSyncFocusedRef.current = true;
     setPs(p => {
       const y = clamp(p.date.getFullYear() + delta, 1, 9999), m = p.date.getMonth();
       const day = clamp(p.date.getDate(), 1, daysInMonth(y, m));
@@ -105,6 +122,7 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   }
 
   function bumpHour(delta: number) {
+    forceSyncFocusedRef.current = true;
     setPs(p => {
       const d = new Date(p.date); d.setHours(wrap(d.getHours() + delta, 24));
       return { ...p, date: d, mode: 'hour' };
@@ -112,6 +130,7 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   }
 
   function bumpMinute(delta: number) {
+    forceSyncFocusedRef.current = true;
     setPs(p => {
       const d = new Date(p.date); d.setMinutes(wrap(d.getMinutes() + delta, 60));
       return { ...p, date: d, mode: 'minute' };
@@ -119,6 +138,7 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   }
 
   function setHour(h: number) {
+    forceSyncFocusedRef.current = true;
     setPs(p => {
       const d = new Date(p.date); d.setHours(wrap(h, 24));
       return { ...p, date: d, mode: 'minute' };
@@ -126,6 +146,7 @@ export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) 
   }
 
   function setMinute(m: number) {
+    forceSyncFocusedRef.current = true;
     setPs(p => {
       const d = new Date(p.date); d.setMinutes(wrap(m, 60));
       return { ...p, date: d };
