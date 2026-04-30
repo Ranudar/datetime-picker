@@ -8,6 +8,13 @@ the standard `<input type="datetime-local">` UX is too sloppy.
 
 Inspired by the date/time picker from the Business Calendar 2 app.
 
+![Trigger and demo controls](docs/screenshot-closed.png)
+
+Click the trigger to open the popup with calendar + numeric Tag / Monat /
+Jahr / Stunde / Minute inputs:
+
+![Popup open on the calendar grid](docs/screenshot-open.png)
+
 ## Install
 
 This is published as a private repo. Add as a git dependency:
