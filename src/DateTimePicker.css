@@ -263,9 +263,12 @@
 }
 
 .dtp-popup .dtp-num-input {
-  /* font-* (family/size/weight/line-height) inherited via the global
-     `input { font: inherit }` rule. font-variant-numeric is not part of
-     the `font` shorthand, so it must be set explicitly. */
+  /* font-* (family/size/weight/line-height) come from the .dtp-num-box
+     parent. We force inheritance here so the component works whether or
+     not the host app has a global `input { font: inherit }` reset.
+     font-variant-numeric is not part of the `font` shorthand, so it
+     must be set explicitly. */
+  font: inherit;
   font-variant-numeric: tabular-nums;
   color: inherit;
   background: transparent;
