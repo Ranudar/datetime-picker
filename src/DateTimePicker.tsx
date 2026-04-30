@@ -39,13 +39,13 @@ interface PS {
 
 // ---- PickerPanel ----
 
-interface PickerPanelProps {
+export interface PickerPanelProps {
   initial: Date;
   onConfirm(d: Date): void;
   onCancel(): void;
 }
 
-function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) {
+export function PickerPanel({ initial, onConfirm, onCancel }: PickerPanelProps) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
